@@ -20,4 +20,12 @@ class RequestClient(DefaultClient):
     def __init__(self, request):
         api_token = request.session.get(ODESK_TOKEN_SESSION_KEY, None) 
         super(RequestClient, self).__init__(api_token) 
-    
+
+
+class UserClient(DefaultClient):
+    def __init__(self, user):
+        if not user.password.startswith('$odesk-token$'):
+            raise ValueError('User %s have no access token for odesk API'
+                             % user)
+        api_token = user.password[13:]
+        super(UserClient, self).__init__(api_token)

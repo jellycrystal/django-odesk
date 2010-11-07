@@ -69,7 +69,6 @@ class OdeskUser(object):
         full_name = u'%s %s' % (self.first_name, self.last_name)
         return full_name.strip()
 
-    
 
 class SimpleBackend(object):
 
@@ -102,10 +101,10 @@ class BaseModelBackend(ModelBackend):
     def authenticate(self, token=None):
         client = DefaultClient(token)
         try:
-            api_token, auth_user = client.auth.check_token() 
+            api_token, auth_user = client.auth.check_token()
         except HTTPError:
             return None
-        
+
         user = None
         username = self.clean_username(auth_user)
         model = get_user_model()
@@ -119,6 +118,8 @@ class BaseModelBackend(ModelBackend):
                 user = model.objects.get(username=username)
             except model.DoesNotExist:
                 pass
+        user.password = '$odesk-token$' + str(api_token)
+        user.save()
         return user
 
     def clean_username(self, auth_user):
@@ -152,5 +153,4 @@ class ModelBackend(BaseModelBackend):
         if user.username in superusers:
             user.is_superuser = True
         user.set_unusable_password()
-        user.save()
         return user
